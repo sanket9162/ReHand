@@ -9,9 +9,7 @@ import (
 func (app *application) router() http.Handler {
 	router := chi.NewRouter()
 
-	router.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("all ok"))
-	})
+	router.Get("/healthz", app.handler.HealthCheck)
 
 	return router
 }
