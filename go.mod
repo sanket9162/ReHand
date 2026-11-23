@@ -2,4 +2,7 @@ module github.com/sanket9162/rehand
 
 go 1.25.4
 
-require github.com/go-chi/chi/v5 v5.5.0 // indirect
+require (
+	github.com/go-chi/chi/v5 v5.5.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+)
