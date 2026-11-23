@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Domain string
 	Port   string
+	DSN    string
 }
 
 func LoadConfig() *Config {
@@ -22,6 +23,7 @@ func LoadConfig() *Config {
 
 	cfg.Domain = os.Getenv("DOMAIN")
 	cfg.Port = os.Getenv("PORT")
+	cfg.DSN = os.Getenv("DSN")
 
 	return &cfg
 }
