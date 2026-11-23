@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"net/http"
+)
 
 func main() {
-	fmt.Println("hello ReHand")
+	err := http.ListenAndServe(":8000", nil)
+	if err != nil {
+		log.Fatalf("server failed %v", err)
+	}
 }
