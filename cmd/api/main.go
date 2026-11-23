@@ -5,8 +5,11 @@ import (
 	"net/http"
 )
 
+type application struct{}
+
 func main() {
-	err := http.ListenAndServe(":8000", nil)
+	var app application
+	err := http.ListenAndServe(":8000", app.router())
 	if err != nil {
 		log.Fatalf("server failed %v", err)
 	}
