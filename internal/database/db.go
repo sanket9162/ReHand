@@ -13,8 +13,14 @@ type DB struct {
 	SQL *sql.DB
 }
 
+const (
+	maxOpenConns = 10
+	maxIdleConns = 5
+	maxIdleTime  = 15 * time.Minute
+)
+
 // ConnectPostgres opens a connection to the database
-func ConnectPostgres(dsn string, maxOpenConns, maxIdleConns int, maxIdleTime time.Duration) (*DB, error) {
+func ConnectPostgres(dsn string) (*DB, error) {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
