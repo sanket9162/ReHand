@@ -25,3 +25,13 @@ clean:
 	@-rm -rf $(DIST_DIR)
 	@go clean
 	@echo "Cleaned!"
+
+migrate-up:
+	@echo "Migrating..."
+	@go run ./cmd/migrate/main.go up
+	@echo "Migrated!"
+
+migrate-down:
+	@echo "Migrating..."
+	@go run ./cmd/migrate/main.go down
+	@echo "Migrated!"
