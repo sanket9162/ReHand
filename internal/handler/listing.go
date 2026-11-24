@@ -1,3 +1,17 @@
 package handler
 
-func (h *Handler) list() {}
+import (
+	"log"
+	"net/http"
+
+	"github.com/sanket9162/rehand/internal/utils"
+)
+
+func (h *Handler) GetListings(w http.ResponseWriter, r *http.Request) {
+	listings, err := h.Repo.Listings(r.Context())
+	if err != nil {
+		log.Print(err)
+	}
+
+	utils.WriteJSON(w, http.StatusOK, listings)
+}
