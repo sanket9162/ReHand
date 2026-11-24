@@ -4,12 +4,12 @@ import (
 	"time"
 )
 
-type listings struct {
-	id          int       `josn:"id"`
-	title       string    `josn:"title"`
-	description string    `josn:"description"`
-	price       float64   `josn:"price"`
-	city        string    `json:"city"`
-	updatedAt   time.Time `josn:"updated_at"`
-	deletedAt   time.Time `josn:"deleted_at"`
+type Listings struct {
+	ID          int       `josn:"id"`
+	Title       string    `josn:"title"`
+	Description string    `josn:"description"`
+	Price       float64   `josn:"price"`
+	City        string    `json:"city"`
+	UpdatedAt   time.Time `josn:"updated_at"`
+	DeletedAt   time.Time `josn:"deleted_at"`
 }
