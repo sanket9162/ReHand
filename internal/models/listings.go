@@ -10,6 +10,6 @@ type Listings struct {
 	Description string    `josn:"description"`
 	Price       float64   `josn:"price"`
 	City        string    `json:"city"`
+	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `josn:"updated_at"`
-	DeletedAt   time.Time `josn:"deleted_at"`
 }
