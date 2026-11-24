@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/sanket9162/rehand/internal/config"
 	"github.com/sanket9162/rehand/internal/database"
@@ -35,8 +34,7 @@ func main() {
 		handler: h,
 		config:  cfg,
 	}
-	err = http.ListenAndServe(":"+app.config.Port, app.router())
-	if err != nil {
+	if err = app.server(); err != nil {
 		log.Fatalf("server failed %v", err)
 	}
 }

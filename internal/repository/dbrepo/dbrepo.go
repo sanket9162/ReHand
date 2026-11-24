@@ -3,6 +3,7 @@ package dbrepo
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/sanket9162/rehand/internal/config"
 	"github.com/sanket9162/rehand/internal/models"
@@ -23,11 +24,14 @@ func NewPostgresDBRepo(conn *sql.DB, app *config.Config) repository.DatabaseRepo
 
 func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error) {
 	query := `
-		SELECT id, title, description, price, city, created_at
+		SELECT id, title, description, price, city, created_at, updated_at
 		FROM listings
 		ORDER BY created_at DESC
 		LIMIT 100
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
 
 	rows, err := p.DB.QueryContext(ctx, query)
 	if err != nil {
@@ -45,6 +49,7 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error
 			&l.Price,
 			&l.City,
 			&l.CreatedAt,
+			&l.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err

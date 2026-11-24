@@ -30,7 +30,7 @@ func ConnectPostgres(dsn string) (*DB, error) {
 	db.SetMaxOpenConns(maxOpenConns)
 	db.SetMaxIdleConns(maxIdleConns)
 	db.SetConnMaxIdleTime(maxIdleTime)
-	db.SetConnMaxLifetime(1 * time.Hour)
+	db.SetConnMaxLifetime(maxConnLifetime)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
