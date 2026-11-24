@@ -10,6 +10,7 @@ func (app *application) router() http.Handler {
 	router := chi.NewRouter()
 
 	router.Get("/healthz", app.handler.HealthCheck)
+	router.Get("/listing", app.handler.GetListings)
 
 	return router
 }

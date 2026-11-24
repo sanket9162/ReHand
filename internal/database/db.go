@@ -14,9 +14,10 @@ type DB struct {
 }
 
 const (
-	maxOpenConns = 10
-	maxIdleConns = 5
-	maxIdleTime  = 15 * time.Minute
+	maxOpenConns    = 10
+	maxIdleConns    = 5
+	maxIdleTime     = 15 * time.Minute
+	maxConnLifetime = 1 * time.Hour
 )
 
 // ConnectPostgres opens a connection to the database
@@ -29,6 +30,7 @@ func ConnectPostgres(dsn string) (*DB, error) {
 	db.SetMaxOpenConns(maxOpenConns)
 	db.SetMaxIdleConns(maxIdleConns)
 	db.SetConnMaxIdleTime(maxIdleTime)
+	db.SetConnMaxLifetime(1 * time.Hour)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

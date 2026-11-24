@@ -7,5 +7,5 @@ import (
 )
 
 type DatabaseRepo interface {
-	Listings(ctx context.Context) ([]*models.Listings, error)
+	Listings(ctx context.Context) ([]*models.Listing, error)
 }

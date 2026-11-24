@@ -1,7 +1,7 @@
 BINARY_NAME=rehand
 DIST_DIR=dist
 
-.PHONY: build start stop clean restart
+.PHONY: build start stop clean restart migrate-up migrate-down
 
 build:
 	@echo "Building..."

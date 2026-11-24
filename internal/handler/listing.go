@@ -11,6 +11,8 @@ func (h *Handler) GetListings(w http.ResponseWriter, r *http.Request) {
 	listings, err := h.Repo.Listings(r.Context())
 	if err != nil {
 		log.Print(err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
 	utils.WriteJSON(w, http.StatusOK, listings)

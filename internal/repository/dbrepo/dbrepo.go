@@ -21,7 +21,7 @@ func NewPostgresDBRepo(conn *sql.DB, app *config.Config) repository.DatabaseRepo
 	}
 }
 
-func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listings, error) {
+func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error) {
 	query := `
 		SELECT id, title, description, price, city, created_at
 		FROM listings
@@ -35,9 +35,9 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listings, erro
 	}
 	defer rows.Close()
 
-	var list []*models.Listings
+	list := make([]*models.Listing, 0)
 	for rows.Next() {
-		var l models.Listings
+		var l models.Listing
 		err := rows.Scan(
 			&l.ID,
 			&l.Title,

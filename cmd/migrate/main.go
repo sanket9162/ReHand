@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -28,7 +29,7 @@ func main() {
 	switch os.Args[1] {
 	case "up":
 		log.Println("up called")
-		if err := m.Up(); err != nil {
+		if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 			log.Fatal(err)
 		}
 	case "down":
