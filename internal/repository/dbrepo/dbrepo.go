@@ -52,5 +52,9 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listings, erro
 		list = append(list, &l)
 	}
 
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return list, nil
 }
