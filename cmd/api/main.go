@@ -7,6 +7,7 @@ import (
 	"github.com/sanket9162/rehand/internal/config"
 	"github.com/sanket9162/rehand/internal/database"
 	"github.com/sanket9162/rehand/internal/handler"
+	"github.com/sanket9162/rehand/internal/repository/dbrepo"
 )
 
 type application struct {
@@ -25,7 +26,10 @@ func main() {
 	}
 	defer db.SQL.Close()
 
-	h := handler.NewHandler()
+	// Initialize application
+	repo := dbrepo.NewPostgresDBRepo(db.SQL, cfg)
+
+	h := handler.NewHandler(repo)
 
 	app := application{
 		handler: h,

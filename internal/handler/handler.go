@@ -3,13 +3,18 @@ package handler
 import (
 	"net/http"
 
+	"github.com/sanket9162/rehand/internal/repository"
 	"github.com/sanket9162/rehand/internal/utils"
 )
 
-type Handler struct{}
+type Handler struct {
+	Repo repository.DatabaseRepo
+}
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(repo repository.DatabaseRepo) *Handler {
+	return &Handler{
+		Repo: repo,
+	}
 }
 
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
