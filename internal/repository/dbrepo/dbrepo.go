@@ -3,6 +3,7 @@ package dbrepo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/sanket9162/rehand/internal/config"
@@ -62,4 +63,27 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error
 	}
 
 	return list, nil
+}
+
+func (p *PostgresDBRepo) DeleteListing(ctx context.Context, id string) error {
+	query := `DELETE FROM listings WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	result, err := p.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	r, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if r == 0 {
+		return errors.New("no listing found with this id")
+	}
+
+	return nil
 }
