@@ -4,6 +4,8 @@ package middleware
 import (
 	"net/http"
 	"runtime/debug"
+
+	"github.com/sanket9162/rehand/internal/utils"
 )
 
 func (mw *Middleware) Recoverer(next http.Handler) http.Handler {
@@ -23,7 +25,9 @@ func (mw *Middleware) Recoverer(next http.Handler) http.Handler {
 					"stack", string(debug.Stack()),
 				)
 
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				if err := utils.ErrorJSON(w, http.StatusInternalServerError, utils.CodeInternalError, "internal server error"); err != nil {
+					mw.Logger.Error("failed to write panic error response", "request_id", reqID, "error", err)
+				}
 			}
 		}()
 

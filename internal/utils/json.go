@@ -9,10 +9,28 @@ import (
 	"strings"
 )
 
-type JSONResponse struct {
-	Error   bool   `json:"error"`
+type Code string
+
+const (
+	CodeInvalidID        Code = "invalid_id"
+	CodeNotFound         Code = "not_found"
+	CodeInternalError    Code = "internal_error"
+	CodeMalformedJSON    Code = "malformed_json"
+	CodeValidationFailed Code = "validation_failed"
+	CodeUnauthenticated  Code = "unauthenticated"
+	CodeForbidden        Code = "forbidden"
+	CodeConflict         Code = "conflict"
+	CodeRateLimited      Code = "rate_limited"
+)
+
+type errorEnvelope struct {
+	Error errorPayload `json:"error"`
+}
+
+type errorPayload struct {
+	Code    Code   `json:"code"`
 	Message string `json:"message"`
-	Data    any    `json:"data,omitempty"`
+	Field   string `json:"field,omitempty"`
 }
 
 func WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error {
@@ -90,16 +108,18 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
 	return nil
 }
 
-func ErrorJSON(w http.ResponseWriter, err error, status ...int) error {
-	statusCode := http.StatusBadRequest
-	if len(status) > 0 {
-		statusCode = status[0]
+// ErrorJSON writes a structured JSON error envelope to the response.
+func ErrorJSON(w http.ResponseWriter, status int, code Code, message string, field ...string) error {
+	payload := errorEnvelope{
+		Error: errorPayload{
+			Code:    code,
+			Message: message,
+		},
 	}
 
-	payload := JSONResponse{
-		Error:   true,
-		Message: err.Error(),
+	if len(field) > 0 {
+		payload.Error.Field = field[0]
 	}
 
-	return WriteJSON(w, statusCode, payload)
+	return WriteJSON(w, status, payload)
 }

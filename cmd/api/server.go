@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,7 +36,7 @@ func (app *application) server() error {
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 		s := <-quit
-		log.Println("received signal", s)
+		app.logger.Info("received signal", "signal", s.String())
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -45,7 +44,7 @@ func (app *application) server() error {
 		shutdownError <- srv.Shutdown(ctx)
 	}()
 
-	log.Println("start serving on", srv.Addr)
+	app.logger.Info("start serving", "addr", srv.Addr)
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("server failed: %w", err)

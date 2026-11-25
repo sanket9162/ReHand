@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"log/slog"
 	"os"
 
@@ -34,7 +33,8 @@ func main() {
 	// initialize database connection
 	db, err := database.ConnectPostgres(cfg.DSN)
 	if err != nil {
-		log.Fatalf("database connection failed %v", err)
+		logger.Error("database connection failed", "error", err)
+		os.Exit(1)
 	}
 	defer db.SQL.Close()
 
@@ -50,6 +50,7 @@ func main() {
 		logger:     logger,
 	}
 	if err = app.server(); err != nil {
-		log.Fatalf("server failed %v", err)
+		logger.Error("server failed", "error", err)
+		os.Exit(1)
 	}
 }
