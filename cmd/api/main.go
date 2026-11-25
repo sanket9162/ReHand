@@ -39,7 +39,7 @@ func main() {
 	defer db.SQL.Close()
 
 	// Initialize application
-	repo := dbrepo.NewPostgresDBRepo(db.SQL, cfg)
+	repo := dbrepo.NewPostgresDBRepo(db.SQL)
 	h := handler.NewHandler(repo, logger)
 	mw := middleware.NewMiddleware(logger)
 

@@ -2,11 +2,14 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 
 	"github.com/sanket9162/rehand/internal/models"
 )
+
+var ErrNotFound = errors.New("record not found")
 
 type DatabaseRepo interface {
 	Listings(ctx context.Context) ([]*models.Listing, error)

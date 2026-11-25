@@ -3,26 +3,25 @@ package dbrepo
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sanket9162/rehand/internal/config"
 	"github.com/sanket9162/rehand/internal/models"
 	"github.com/sanket9162/rehand/internal/repository"
 )
 
 type PostgresDBRepo struct {
-	App *config.Config
-	DB  *sql.DB
+	DB *sql.DB
 }
 
-func NewPostgresDBRepo(conn *sql.DB, app *config.Config) repository.DatabaseRepo {
+func NewPostgresDBRepo(conn *sql.DB) repository.DatabaseRepo {
 	return &PostgresDBRepo{
-		App: app,
-		DB:  conn,
+		DB: conn,
 	}
 }
+
+const dbTimeout = 3 * time.Second
 
 func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error) {
 	query := `
@@ -32,12 +31,12 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error
 		LIMIT 100
 	`
 
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, dbTimeout)
 	defer cancel()
 
 	rows, err := p.DB.QueryContext(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query listings: %w", err)
 	}
 	defer rows.Close()
 
@@ -54,13 +53,13 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error
 			&l.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan listing: %w", err)
 		}
 		list = append(list, &l)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("iterate listings: %w", err)
 	}
 
 	return list, nil
@@ -69,21 +68,21 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error
 func (p *PostgresDBRepo) DeleteListing(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM listings WHERE id = $1`
 
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, dbTimeout)
 	defer cancel()
 
 	result, err := p.DB.ExecContext(ctx, query, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("delete listing: %w", err)
 	}
 
 	r, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("delete listing rows affected: %w", err)
 	}
 
 	if r == 0 {
-		return errors.New("no listing found with this id")
+		return repository.ErrNotFound
 	}
 
 	return nil
