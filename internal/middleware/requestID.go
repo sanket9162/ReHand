@@ -11,7 +11,7 @@ type contextKey string
 
 const RequestIDKey contextKey = "request_id"
 
-func RequestID(next http.Handler) http.Handler {
+func (mw *Middleware) RequestID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqID := r.Header.Get("X-Request-Id")
 		if reqID == "" {

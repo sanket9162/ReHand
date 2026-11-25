@@ -2,12 +2,11 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"runtime/debug"
 )
 
-func Recoverer(next http.Handler) http.Handler {
+func (mw *Middleware) Recoverer(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rvr := recover(); rvr != nil {
@@ -18,7 +17,11 @@ func Recoverer(next http.Handler) http.Handler {
 				}
 
 				reqID := GetRequestID(r.Context())
-				log.Printf("[PANIC] request_id=%s err=%v\n%s", reqID, rvr, debug.Stack())
+				mw.Logger.Error("panic recovered",
+					"request_id", reqID,
+					"error", rvr,
+					"stack", string(debug.Stack()),
+				)
 
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			}

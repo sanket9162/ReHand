@@ -35,8 +35,8 @@ func (h *Handler) DeleteListing(w http.ResponseWriter, r *http.Request) {
 
 	err = h.Repo.DeleteListing(r.Context(), newId)
 	if err != nil {
-		log.Print(err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		h.logger.Error("internal server error %v", err)
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 

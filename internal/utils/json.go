@@ -49,6 +49,7 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
 		var invalidUnmarshalError *json.InvalidUnmarshalError
+		var maxBytesError *http.MaxBytesError
 
 		switch {
 		case errors.As(err, &syntaxError):
@@ -70,16 +71,20 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
 			return fmt.Errorf("body contains unknown field: %s", fieldName)
 
-		case err.Error() == "http: request body too large":
-			return fmt.Errorf("body must not be large than %d bytes", maxBytes)
+		case errors.As(err, &maxBytesError):
+			return fmt.Errorf("body must not be larger than %d bytes", maxBytesError.Limit)
 
 		case errors.As(err, &invalidUnmarshalError):
-			return fmt.Errorf("body contains invalid JSON")
+			panic(err)
 
 		default:
 			return err
 		}
 
+	}
+
+	if err := dec.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return errors.New("body must only contain a single JSON value")
 	}
 
 	return nil
