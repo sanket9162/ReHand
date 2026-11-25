@@ -31,7 +31,7 @@ func (app *application) server() error {
 	}
 
 	// define gracefull shutdown
-	shutdownError := make(chan error)
+	shutdownError := make(chan error, 1)
 
 	go func() {
 		quit := make(chan os.Signal, 1)
