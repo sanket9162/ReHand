@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/sanket9162/rehand/internal/repository"
@@ -8,12 +9,14 @@ import (
 )
 
 type Handler struct {
-	Repo repository.DatabaseRepo
+	Repo   repository.DatabaseRepo
+	logger *slog.Logger
 }
 
-func NewHandler(repo repository.DatabaseRepo) *Handler {
+func NewHandler(repo repository.DatabaseRepo, logger *slog.Logger) *Handler {
 	return &Handler{
-		Repo: repo,
+		Repo:   repo,
+		logger: logger,
 	}
 }
 

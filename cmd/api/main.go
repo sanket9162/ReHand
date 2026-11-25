@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"log/slog"
+	"os"
 
 	"github.com/sanket9162/rehand/internal/config"
 	"github.com/sanket9162/rehand/internal/database"
@@ -10,11 +12,20 @@ import (
 )
 
 type application struct {
+	logger  *slog.Logger
 	handler *handler.Handler
 	config  *config.Config
 }
 
 func main() {
+	// initialize logger
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	})
+	logger := slog.New(logHandler)
+	slog.SetDefault(logger)
+
 	// Load config
 	cfg := config.LoadConfig()
 
@@ -27,8 +38,7 @@ func main() {
 
 	// Initialize application
 	repo := dbrepo.NewPostgresDBRepo(db.SQL, cfg)
-
-	h := handler.NewHandler(repo)
+	h := handler.NewHandler(repo, logger)
 
 	app := application{
 		handler: h,
