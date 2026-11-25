@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sanket9162/rehand/internal/config"
 	"github.com/sanket9162/rehand/internal/models"
 	"github.com/sanket9162/rehand/internal/repository"
@@ -65,7 +66,7 @@ func (p *PostgresDBRepo) Listings(ctx context.Context) ([]*models.Listing, error
 	return list, nil
 }
 
-func (p *PostgresDBRepo) DeleteListing(ctx context.Context, id string) error {
+func (p *PostgresDBRepo) DeleteListing(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM listings WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
