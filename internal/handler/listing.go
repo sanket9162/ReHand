@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -13,10 +14,10 @@ import (
 )
 
 type createListingRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Price       int64  `json:"price"`
-	City        string `json:"city"`
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Price       int64  `json:"price" validate:"required,gt=0"`
+	City        string `json:"city" validate:"required"`
 }
 
 func (h *Handler) GetListings(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +72,21 @@ func (h *Handler) CreateListings(w http.ResponseWriter, r *http.Request) {
 	var input createListingRequest
 	if err := utils.ReadJSON(w, r, &input); err != nil {
 		_ = utils.ErrorJSON(w, http.StatusBadRequest, utils.CodeMalformedJSON, err.Error())
+		return
+	}
+
+	input.Title = strings.TrimSpace(input.Title)
+	input.Description = strings.TrimSpace(input.Description)
+	input.City = strings.TrimSpace(input.City)
+
+	if err := utils.ValidateStruct(input); err != nil {
+		var valErr *utils.ValidationError
+		if errors.As(err, &valErr) {
+			_ = utils.ErrorJSON(w, http.StatusBadRequest, utils.CodeValidationFailed, valErr.Message, valErr.Field)
+			return
+		}
+		h.logger.Error("unexpected validation error", "request_id", reqID, "error", err)
+		_ = utils.ErrorJSON(w, http.StatusInternalServerError, utils.CodeInternalError, "internal server error")
 		return
 	}
 
