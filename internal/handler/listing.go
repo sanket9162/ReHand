@@ -7,9 +7,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/sanket9162/rehand/internal/middleware"
+	"github.com/sanket9162/rehand/internal/models"
 	"github.com/sanket9162/rehand/internal/repository"
 	"github.com/sanket9162/rehand/internal/utils"
 )
+
+type createListingRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	City        string `json:"city"`
+}
 
 func (h *Handler) GetListings(w http.ResponseWriter, r *http.Request) {
 	reqID := middleware.GetRequestID(r.Context())
@@ -60,7 +68,28 @@ func (h *Handler) DeleteListing(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CreateListings(w http.ResponseWriter, r *http.Request) {
 	reqID := middleware.GetRequestID(r.Context())
 
-	if err := utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "ok"}); err != nil {
-		h.logger.Error("failed to write delete response", "request_id", reqID, "error", err)
+	var input createListingRequest
+	if err := utils.ReadJSON(w, r, &input); err != nil {
+		_ = utils.ErrorJSON(w, http.StatusBadRequest, utils.CodeMalformedJSON, err.Error())
+		return
+	}
+
+	listing := &models.Listing{
+		Title:       input.Title,
+		Description: input.Description,
+		Price:       input.Price,
+		City:        input.City,
+	}
+
+	created, err := h.Repo.CreateListing(r.Context(), listing)
+	if err != nil {
+		h.logger.Error("failed to create listing", "request_id", reqID, "error", err)
+		_ = utils.ErrorJSON(w, http.StatusInternalServerError, utils.CodeInternalError, "internal server error")
+		return
+	}
+	headers := http.Header{"Location": {"/listings/" + created.ID.String()}}
+
+	if err := utils.WriteJSON(w, http.StatusCreated, created, headers); err != nil {
+		h.logger.Error("failed to write create listing response", "request_id", reqID, "error", err)
 	}
 }

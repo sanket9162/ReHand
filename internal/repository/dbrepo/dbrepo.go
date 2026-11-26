@@ -92,7 +92,7 @@ func (p *PostgresDBRepo) CreateListing(ctx context.Context, l *models.Listing) (
 	query := `
 		INSERT INTO listings (title, description, price, city)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, title description, price, city, created_at, updated_at
+		RETURNING id, title, description, price, city, created_at, updated_at
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, dbTimeout)
