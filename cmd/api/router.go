@@ -13,6 +13,9 @@ func (app *application) router() http.Handler {
 	router.Use(app.middleware.Recoverer)
 
 	router.Get("/healthz", app.handler.HealthCheck)
+	router.NotFound(app.handler.NotFound)
+	router.MethodNotAllowed(app.handler.MethodNotAllowed)
+
 	router.Get("/listings", app.handler.GetListings)
 	router.Delete("/listings/{id}", app.handler.DeleteListing)
 

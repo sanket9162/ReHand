@@ -14,8 +14,10 @@ const RequestIDKey contextKey = "request_id"
 func (mw *Middleware) RequestID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqID := r.Header.Get("X-Request-Id")
-		if reqID == "" {
+		if parsed, err := uuid.Parse(reqID); err != nil {
 			reqID = uuid.NewString()
+		} else {
+			reqID = parsed.String()
 		}
 
 		w.Header().Set("X-Request-Id", reqID)

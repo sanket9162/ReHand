@@ -29,3 +29,11 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		)
 	}
 }
+
+func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
+	_ = utils.ErrorJSON(w, http.StatusNotFound, utils.CodeNotFound, "route not found")
+}
+
+func (h *Handler) MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	_ = utils.ErrorJSON(w, http.StatusMethodNotAllowed, utils.CodeValidationFailed, "method not allowed")
+}
