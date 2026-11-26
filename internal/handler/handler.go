@@ -31,9 +31,19 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
-	_ = utils.ErrorJSON(w, http.StatusNotFound, utils.CodeNotFound, "route not found")
+	if err := utils.ErrorJSON(w, http.StatusNotFound, utils.CodeNotFound, "route not found"); err != nil {
+		h.logger.Error("failed to write not found response",
+			"request_id", middleware.GetRequestID(r.Context()),
+			"error", err,
+		)
+	}
 }
 
 func (h *Handler) MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	_ = utils.ErrorJSON(w, http.StatusMethodNotAllowed, utils.CodeValidationFailed, "method not allowed")
+	if err := utils.ErrorJSON(w, http.StatusMethodNotAllowed, utils.CodeMethodNotAllowed, "method not allowed"); err != nil {
+		h.logger.Error("failed to write method not allowed response",
+			"request_id", middleware.GetRequestID(r.Context()),
+			"error", err,
+		)
+	}
 }

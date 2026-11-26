@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,6 +24,7 @@ func (app *application) server() error {
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%s", app.config.Port),
 		Handler:           app.router(),
+		ErrorLog:          slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
 		ReadTimeout:       readTimeout,
 		ReadHeaderTimeout: readHeaderTimeout,
 		WriteTimeout:      writeTimeout,

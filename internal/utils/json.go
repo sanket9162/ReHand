@@ -14,6 +14,7 @@ type Code string
 const (
 	CodeInvalidID        Code = "invalid_id"
 	CodeNotFound         Code = "not_found"
+	CodeMethodNotAllowed Code = "method_not_allowed"
 	CodeInternalError    Code = "internal_error"
 	CodeMalformedJSON    Code = "malformed_json"
 	CodeValidationFailed Code = "validation_failed"
@@ -71,7 +72,7 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
 
 		switch {
 		case errors.As(err, &syntaxError):
-			return fmt.Errorf("body contains invalid badly-format JSON (at character %d)", syntaxError.Offset)
+			return fmt.Errorf("body contains badly-formatted JSON (at character %d)", syntaxError.Offset)
 
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			return errors.New("body contains badly formatted JSON")
