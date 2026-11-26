@@ -31,12 +31,12 @@ func (app *application) server() error {
 		IdleTimeout:       idleTimeout,
 	}
 
-	// define gracefull shutdown
+	// define graceful shutdown
 	shutdownError := make(chan error, 1)
 
 	go func() {
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 		s := <-quit
 		app.logger.Info("received signal", "signal", s.String())
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"strings"
 )
@@ -40,11 +41,10 @@ func WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Head
 		return err
 	}
 
-	if len(headers) > 0 {
-		for key, value := range headers[0] {
-			w.Header()[key] = value
+	for _, hdr := range headers {
+		for key, values := range hdr {
+			w.Header()[http.CanonicalHeaderKey(key)] = values
 		}
-
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -57,6 +57,13 @@ func WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Head
 }
 
 func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
+	if ct := r.Header.Get("Content-Type"); ct != "" {
+		mediaType, _, err := mime.ParseMediaType(ct)
+		if err != nil || mediaType != "application/json" {
+			return errors.New("Content-Type header must be application/json")
+		}
+	}
+
 	maxBytes := 1024 * 1024
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 

@@ -1,12 +1,16 @@
 BINARY_NAME=rehand
 DIST_DIR=dist
 
-.PHONY: build start stop clean restart migrate-up migrate-down
+.PHONY: build run start stop clean restart migrate-up migrate-down
 
+## build: compiles the application binary
 build:
 	@echo "Building..."
 	@go build -o $(DIST_DIR)/$(BINARY_NAME) ./cmd/api
 	@echo "Built!"
+## run: runs the application in the foreground
+run:
+	@go run ./cmd/api
 ## start: builds and runs the application in the background
 start: build
 	@echo "Starting..."
