@@ -14,4 +14,5 @@ var ErrNotFound = errors.New("record not found")
 type DatabaseRepo interface {
 	Listings(ctx context.Context) ([]*models.Listing, error)
 	DeleteListing(ctx context.Context, id uuid.UUID) error
+	CreateListing(ctx context.Context, l *models.Listing) (*models.Listing, error)
 }

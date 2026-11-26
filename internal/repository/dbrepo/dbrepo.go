@@ -87,3 +87,40 @@ func (p *PostgresDBRepo) DeleteListing(ctx context.Context, id uuid.UUID) error 
 
 	return nil
 }
+
+func (p *PostgresDBRepo) CreateListing(ctx context.Context, l *models.Listing) (*models.Listing, error) {
+	query := `
+		INSERT INTO listings (title, description, price, city)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, title description, price, city, created_at, updated_at
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, dbTimeout)
+	defer cancel()
+
+	var created models.Listing
+	err := p.DB.QueryRowContext(
+		ctx,
+		query,
+		l.Title,
+		l.Description,
+		l.Price,
+		l.City,
+	).Scan(
+		&created.ID,
+		&created.Title,
+		&created.Description,
+		&created.Price,
+		&created.City,
+		&created.CreatedAt,
+		&created.UpdatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create listing: %w", err)
+	}
+
+	l.ID = created.ID
+
+	return &created, nil
+
+}
