@@ -18,6 +18,7 @@ func (app *application) router() http.Handler {
 
 	router.Get("/listings", app.handler.GetListings)
 	router.Delete("/listings/{id}", app.handler.DeleteListing)
+	router.Post("/listings", app.handler.CreateListings)
 
 	return router
 }

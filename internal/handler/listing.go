@@ -56,3 +56,11 @@ func (h *Handler) DeleteListing(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("failed to write delete response", "request_id", reqID, "error", err)
 	}
 }
+
+func (h *Handler) CreateListings(w http.ResponseWriter, r *http.Request) {
+	reqID := middleware.GetRequestID(r.Context())
+
+	if err := utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "ok"}); err != nil {
+		h.logger.Error("failed to write delete response", "request_id", reqID, "error", err)
+	}
+}
