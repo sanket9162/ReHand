@@ -66,7 +66,7 @@ func (h *Handler) DeleteListing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) CreateListings(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateListing(w http.ResponseWriter, r *http.Request) {
 	reqID := middleware.GetRequestID(r.Context())
 
 	var input createListingRequest

@@ -119,8 +119,5 @@ func (p *PostgresDBRepo) CreateListing(ctx context.Context, l *models.Listing) (
 		return nil, fmt.Errorf("create listing: %w", err)
 	}
 
-	l.ID = created.ID
-
 	return &created, nil
-
 }
