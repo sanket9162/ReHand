@@ -29,6 +29,10 @@ func main() {
 
 	// Load config
 	cfg := config.LoadConfig()
+	if err := cfg.ValidateAPI(); err != nil {
+		logger.Error("invalid configuration", "error", err)
+		os.Exit(1)
+	}
 
 	// initialize database connection
 	db, err := database.ConnectPostgres(cfg.DSN)
