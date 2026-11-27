@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sanket9162/rehand/internal/models"
 	"github.com/sanket9162/rehand/internal/repository"
 )
@@ -149,12 +149,40 @@ func (p *PostgresDBRepo) CreateUser(ctx context.Context, u *models.User) (*model
 		&created.UpdatedAt,
 	)
 	if err != nil {
-		var pgErr *pq.Error
-		if errors.As(err, &pgErr) && pgErr.Code.Name() == "23505" {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, repository.ErrDuplicateEmail
 		}
 		return nil, fmt.Errorf("create user: %w", err)
 	}
 
 	return &created, nil
+}
+
+func (p *PostgresDBRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := `
+		SELECT id, name, email, password, created_at, updated_at
+		FROM users
+		WHERE email = $1
+	`
+	ctx, cancel := context.WithTimeout(ctx, dbTimeout)
+	defer cancel()
+
+	var u models.User
+	err := p.DB.QueryRowContext(ctx, query, email).Scan(
+		&u.ID,
+		&u.Name,
+		&u.Email,
+		&u.Password,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repository.ErrNotFound
+		}
+		return nil, fmt.Errorf("get user by email: %w", err)
+	}
+	return &u, nil
+
 }
