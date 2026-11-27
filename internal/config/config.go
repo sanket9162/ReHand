@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -16,6 +17,7 @@ type Auth struct {
 	RefreshExpiry time.Duration
 	CookieDomain  string
 	CookiePath    string
+	CookieSecure  bool
 }
 
 type Config struct {
@@ -34,6 +36,8 @@ func LoadConfig() *Config {
 	cfg.Port = getEnv("PORT", "8080")
 	cfg.DSN = os.Getenv("DSN")
 
+	cookieSecure, _ := strconv.ParseBool(os.Getenv("COOKIE_SECURE"))
+
 	cfg.Auth = Auth{
 		Issuer:        getEnv("JWT_ISSUER", "rehand"),
 		Audience:      getEnv("JWT_AUDIENCE", "rehand"),
@@ -42,6 +46,7 @@ func LoadConfig() *Config {
 		RefreshExpiry: 7 * 24 * time.Hour,
 		CookieDomain:  getEnv("COOKIE_DOMAIN", "localhost"),
 		CookiePath:    getEnv("COOKIE_PATH", "/"),
+		CookieSecure:  cookieSecure,
 	}
 
 	return &cfg
