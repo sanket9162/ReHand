@@ -63,6 +63,8 @@ func formatFieldError(fe validator.FieldError) string {
 		return fmt.Sprintf("%s must be at least %s", fe.Field(), fe.Param())
 	case "max":
 		return fmt.Sprintf("%s must not exceed %s", fe.Field(), fe.Param())
+	case "email":
+		return fmt.Sprintf("%s must be a valid email address", fe.Field())
 	default:
 		return fmt.Sprintf("%s failed validation on %s", fe.Field(), fe.Tag())
 	}
