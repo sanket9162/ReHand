@@ -12,16 +12,27 @@ import (
 type Handler struct {
 	Repo   repository.DatabaseRepo
 	logger *slog.Logger
+	jwt    *utils.JWT
 }
 
-func NewHandler(repo repository.DatabaseRepo, logger *slog.Logger) *Handler {
+func NewHandler(repo repository.DatabaseRepo, logger *slog.Logger, jwt *utils.JWT) *Handler {
 	return &Handler{
 		Repo:   repo,
 		logger: logger,
+		jwt:    jwt,
 	}
 }
 
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	if err := h.Repo.Ping(r.Context()); err != nil {
+		h.logger.Error("healthcheck database ping failed",
+			"request_id", middleware.GetRequestID(r.Context()),
+			"error", err,
+		)
+		_ = utils.ErrorJSON(w, http.StatusServiceUnavailable, utils.CodeInternalError, "database unavailable")
+		return
+	}
+
 	if err := utils.WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"}); err != nil {
 		h.logger.Error("failed to write healthcheck response",
 			"request_id", middleware.GetRequestID(r.Context()),

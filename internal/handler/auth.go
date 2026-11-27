@@ -117,7 +117,74 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := utils.WriteJSON(w, http.StatusOK, user); err != nil {
+	tokens, err := h.jwt.GenerateTokenPair(&utils.JwtUser{ID: user.ID})
+	if err != nil {
+		h.logger.Error("failed to generate tokens", "request_id", reqID, "error", err)
+		_ = utils.ErrorJSON(w, http.StatusInternalServerError, utils.CodeInternalError, "internal server error")
+		return
+	}
+
+	http.SetCookie(w, h.jwt.GetAccessTokenCookie(tokens.Token))
+	http.SetCookie(w, h.jwt.GetRefreshCookie(tokens.RefreshToken))
+
+	resp := map[string]any{
+		"access_token":  tokens.Token,
+		"refresh_token": tokens.RefreshToken,
+		"user":          user,
+	}
+	if err := utils.WriteJSON(w, http.StatusOK, resp); err != nil {
 		h.logger.Error("failed to write signin response", "request_id", reqID, "error", err)
+	}
+}
+
+func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	reqID := middleware.GetRequestID(r.Context())
+
+	cookie, err := r.Cookie("refresh_token")
+	if err != nil || cookie.Value == "" {
+		_ = utils.ErrorJSON(w, http.StatusUnauthorized, utils.CodeUnauthenticated, "missing refresh token")
+		return
+	}
+
+	claims, err := h.jwt.ValidateToken(cookie.Value, utils.TokenTypeRefresh)
+	if err != nil {
+		_ = utils.ErrorJSON(w, http.StatusUnauthorized, utils.CodeUnauthenticated, "invalid or expired refresh token")
+		return
+	}
+
+	user, err := h.Repo.GetUserByID(r.Context(), claims.ID)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			_ = utils.ErrorJSON(w, http.StatusUnauthorized, utils.CodeUnauthenticated, "user not found")
+			return
+		}
+		h.logger.Error("failed to get user during refresh", "request_id", reqID, "error", err)
+		_ = utils.ErrorJSON(w, http.StatusInternalServerError, utils.CodeInternalError, "internal server error")
+		return
+	}
+
+	tokens, err := h.jwt.GenerateTokenPair(&utils.JwtUser{ID: user.ID})
+	if err != nil {
+		h.logger.Error("failed to generate refresh tokens", "request_id", reqID, "error", err)
+		_ = utils.ErrorJSON(w, http.StatusInternalServerError, utils.CodeInternalError, "internal server error")
+		return
+	}
+
+	http.SetCookie(w, h.jwt.GetAccessTokenCookie(tokens.Token))
+	http.SetCookie(w, h.jwt.GetRefreshCookie(tokens.RefreshToken))
+
+	if err := utils.WriteJSON(w, http.StatusOK, tokens); err != nil {
+		h.logger.Error("failed to write refresh response", "request_id", reqID, "error", err)
+	}
+}
+
+func (h *Handler) SignOut(w http.ResponseWriter, r *http.Request) {
+	reqID := middleware.GetRequestID(r.Context())
+
+	http.SetCookie(w, h.jwt.GetExpiredAccessTokenCookie())
+	http.SetCookie(w, h.jwt.GetExpiredRefreshCookie())
+
+	if err := utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "signed out"}); err != nil {
+		h.logger.Error("failed to write signout response", "request_id", reqID, "error", err)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/sanket9162/rehand/internal/handler"
 	"github.com/sanket9162/rehand/internal/middleware"
 	"github.com/sanket9162/rehand/internal/repository/dbrepo"
+	"github.com/sanket9162/rehand/internal/utils"
 )
 
 type application struct {
@@ -43,9 +44,10 @@ func main() {
 	defer db.SQL.Close()
 
 	// Initialize application
+	jwtSvc := utils.NewJWT(cfg.Auth)
 	repo := dbrepo.NewPostgresDBRepo(db.SQL)
-	h := handler.NewHandler(repo, logger)
-	mw := middleware.NewMiddleware(logger)
+	h := handler.NewHandler(repo, logger, jwtSvc)
+	mw := middleware.NewMiddleware(logger, jwtSvc)
 
 	app := application{
 		handler:    h,
