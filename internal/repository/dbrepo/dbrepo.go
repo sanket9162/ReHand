@@ -3,10 +3,12 @@ package dbrepo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/sanket9162/rehand/internal/models"
 	"github.com/sanket9162/rehand/internal/repository"
 )
@@ -117,6 +119,41 @@ func (p *PostgresDBRepo) CreateListing(ctx context.Context, l *models.Listing) (
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create listing: %w", err)
+	}
+
+	return &created, nil
+}
+
+func (p *PostgresDBRepo) CreateUser(ctx context.Context, u *models.User) (*models.User, error) {
+	query := `
+		INSERT INTO users (name, email, password)
+		VALUES ($1, $2, $3)
+		RETURNING id, name, email, created_at, updated_at
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, dbTimeout)
+	defer cancel()
+
+	var created models.User
+	err := p.DB.QueryRowContext(
+		ctx,
+		query,
+		u.Name,
+		u.Email,
+		u.Password,
+	).Scan(
+		&created.ID,
+		&created.Name,
+		&created.Email,
+		&created.CreatedAt,
+		&created.UpdatedAt,
+	)
+	if err != nil {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code.Name() == "23505" {
+			return nil, repository.ErrDuplicateEmail
+		}
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 
 	return &created, nil
