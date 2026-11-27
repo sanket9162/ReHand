@@ -8,6 +8,7 @@ import (
 
 type Listing struct {
 	ID          uuid.UUID `json:"id"`
+	UserID      uuid.UUID `json:"user_id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Price       int64     `json:"price"`
